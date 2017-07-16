@@ -1,12 +1,9 @@
 import unittest
 from util.OCR_Pre import OCR_Pre
+import Data
 
 class Test_test1(unittest.TestCase):
-   folder = 'c:/Users/pc/Desktop/paper/OCR/image/'       
-   path0 = folder+'sample0.jpg'
-   path1 = folder+'sample2.jpg'
-   path2 = folder+'sample1.jpeg'       
-
+   
    def test_B(self):
        self.assertTrue(True)
    
@@ -15,37 +12,37 @@ class Test_test1(unittest.TestCase):
 
    def test_Cut(self):
        ocr = OCR_Pre()
-       cut_GT = [[44],[46],[]]       
-       ocr.ReadImage(self.path0)       
+       gt = Data.cut_GT
+       ocr.ReadImage(Data.path0)       
        cut = ocr.GetCutIndexs()       
-       self.assertEquals(cut,cut_GT[0])
+       self.assertEquals(cut,gt[0])
        
-       ocr.ReadImage(self.path1)
+       ocr.ReadImage(Data.path1)
        cut = ocr.GetCutIndexs()       
-       self.assertEquals(cut,cut_GT[1])
+       self.assertEquals(cut,gt[1])
        
-       ocr.ReadImage(self.path2)
+       ocr.ReadImage(Data.path2)
        cut = ocr.GetCutIndexs()       
-       self.assertEquals(cut,cut_GT[2])
+       self.assertEquals(cut,gt[2])
 
    def test_Rotate(self):
        ocr = OCR_Pre()
-       angle_GT = [[1.5, 1.0],[-1.0, -1.0],[6.5] ]
+       gt = Data.angle_GT
        
-       ocr.ReadImage(self.path0)       
+       ocr.ReadImage(Data.path0)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,angle_GT[0])
+       self.assertEquals(angles,gt[0])
               
-       ocr.ReadImage(self.path1)       
+       ocr.ReadImage(Data.path1)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,angle_GT[1])
+       self.assertEquals(angles,gt[1])
 
-       ocr.ReadImage(self.path2)       
+       ocr.ReadImage(Data.path2)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,angle_GT[2])
+       self.assertEquals(angles,gt[2])
 
 if __name__ == '__main__':
    unittest.main()
