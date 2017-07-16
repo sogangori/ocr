@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f2f45a79-10df-4bb6-a6e5-7b4e2a3dddb9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>util\OCR_Pre.py</StartupFile>
+    <StartupFile>Run_ocr.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ocr.py" />
+    <Compile Include="Run_ocr.py" />
     <Compile Include="test\CutPadding.py">
       <SubType>Code</SubType>
     </Compile>

@@ -13,6 +13,7 @@ class OCR_Pre():
     localMinimums = 0
     rotateImage = []
     cut_src = []
+    rot_angles = []
     plot_column = 2
     local_min_offset_ratio = 0.75
     isShowLocalMin = not True
@@ -22,7 +23,13 @@ class OCR_Pre():
     def __init__(self):
         print ("OCR_Pre __init__")
 
+    def Reset(self):
+        self.rot_angles.clear()
+        self.cut_src.clear()
+        self.rotateImage.clear()
+
     def ReadImage(self, path):
+        self.Reset()
         img = Image.open(path)
         grayImg = img.convert('L')
         self.grayImg = PIL.ImageOps.invert(grayImg)
@@ -75,14 +82,14 @@ class OCR_Pre():
             mean_1 = np.mean(np.std(src, axis=1))
             mean_2 = np.mean(np.std(src, axis=0))
             elsilon = 0.1
-            mean = 1/(mean_1+elsilon)  * 1/(mean_2+elsilon)
+            mean = 1/(mean_1+elsilon) * 1/(mean_2+elsilon)
             if mean > maxMean :
                 #print ('rotate angle',angle,'mean',mean)
                 maxMean  = mean
                 maxAngle = angle
 
         print ('max Angle',maxAngle,'maxMean',maxMean)    
-        return maxAngle-0
+        return maxAngle
 
     def GetRotations(self):    
         src = self.grayArr
@@ -102,8 +109,9 @@ class OCR_Pre():
         for i in range(len(candidate_offset)):
             offset = candidate_offset[i]
             print ('offset ',offset )
-            candidate = src[:,offset [0]:offset [1]]
+            candidate = src[:,offset [0]:offset [1]]            
             angle = self.GetRotationAngle(candidate)        
+            self.rot_angles.append(angle)
             image_rot = image.rotate(angle)
             src_rot = np.array(image_rot)
             image_rot_cut = src_rot[:,offset [0]:offset [1]]
@@ -116,7 +124,7 @@ class OCR_Pre():
                 plt.subplot(plot_row,self.plot_column,self.plot_column*i+1)    
                 plt.title('rotate'+str(img_rotate.shape))
                 plt.imshow(img_rotate, cmap = plt.get_cmap('gray'))
-        return self.rotateImage
+        return self.rot_angles
 
     def CutPadding(self, src):
         sum_row = np.sum(src, axis=0)
@@ -299,7 +307,7 @@ class OCR_Pre():
             plt.show()
 
         self.localMinimums  = self.GetLocalMinimum(best_cos_arr+1)   
-        return len(self.localMinimums )
+        return self.localMinimums
         
     def DivideColumn(self, image, localMinimumIndexs):       
         src = np.asarray(image)
@@ -317,22 +325,3 @@ class OCR_Pre():
         column = src[:,x0:]
         columns.append(column)    
         return columns
-
-
-#ocr = OCR_Pre()
-
-#folder = 'c:/Users/pc/Desktop/논문/OCR/image/'
-#path = folder+'sample0.jpg'
-##path = folder+'sample2.jpg'
-##path = folder+'sample1.jpeg'
-
-#ocr.ReadImage(path)
-#ocr.ResizeIfBig()
-#cutPoint = ocr.GetCutIndexs() #돌리고 자르자 피벗
-#print ('cutPoint',cutPoint)
-#ocr.GetRotations()
-#ocr.CutPaddings()
-
-#if isFigure: 
-#    ocr.GetLetterSizes()
-#plt.show()
