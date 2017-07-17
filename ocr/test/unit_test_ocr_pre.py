@@ -13,15 +13,15 @@ class Test_test1(unittest.TestCase):
    def test_Cut(self):
        ocr = OCR_Pre()
        gt = Data.cut_GT
-       ocr.ReadImage(Data.path0)       
+       ocr.Read(Data.path0)       
        cut = ocr.GetCutIndexs()       
        self.assertEquals(cut,gt[0])
        
-       ocr.ReadImage(Data.path1)
+       ocr.Read(Data.path1)
        cut = ocr.GetCutIndexs()       
        self.assertEquals(cut,gt[1])
        
-       ocr.ReadImage(Data.path2)
+       ocr.Read(Data.path2)
        cut = ocr.GetCutIndexs()       
        self.assertEquals(cut,gt[2])
 
@@ -29,17 +29,17 @@ class Test_test1(unittest.TestCase):
        ocr = OCR_Pre()
        gt = Data.angle_GT
        
-       ocr.ReadImage(Data.path0)       
+       ocr.Read(Data.path0)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
        self.assertEquals(angles,gt[0])
               
-       ocr.ReadImage(Data.path1)       
+       ocr.Read(Data.path1)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
        self.assertEquals(angles,gt[1])
 
-       ocr.ReadImage(Data.path2)       
+       ocr.Read(Data.path2)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
        self.assertEquals(angles,gt[2])
@@ -48,7 +48,7 @@ class Test_test1(unittest.TestCase):
        ocr = OCR_Pre()
        gt = Data.font_row_GT
        
-       ocr.ReadImage(Data.path0)       
+       ocr.Read(Data.path0)       
        ocr.GetCutIndexs()
        ocr.GetRotations()
        ocr.CutPaddings()       
@@ -62,7 +62,7 @@ class Test_test1(unittest.TestCase):
        ocr = OCR_Pre()
        gt = Data.font_row_GT
        
-       ocr.ReadImage(Data.path2)       
+       ocr.Read(Data.path2)       
        ocr.GetCutIndexs()
        ocr.GetRotations()
        ocr.CutPaddings()       

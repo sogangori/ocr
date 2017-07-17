@@ -30,7 +30,7 @@ class OCR_Pre():
         self.cut_src.clear()
         self.rotateImage.clear()
 
-    def ReadImage(self, path):
+    def Read(self, path):
         self.Reset()
         img = Image.open(path)
         grayImg = img.convert('L')

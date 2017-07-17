@@ -32,7 +32,7 @@
     <Compile Include="test\TestFor.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="test\unit_test_0.py">
+    <Compile Include="test\unit_test_ocr_pre.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="util\OCR_Pre.py" />

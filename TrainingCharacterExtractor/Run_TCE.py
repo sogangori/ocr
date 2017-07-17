@@ -3,4 +3,8 @@ from TrainCharacterExtractor import TrainCharacterExtractor
 import Data
  
 tce = TrainCharacterExtractor()
-tce.Read(Data.path0)
+tce.isFigure = True
+
+tce.Read(Data.path1)
+tce.GetRotationAngle()
+tce.GetGrid()

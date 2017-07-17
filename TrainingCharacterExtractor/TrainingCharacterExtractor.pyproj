@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>2af72e32-ecfc-4a92-a992-43503fa1fe77</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>RunTCE.py</StartupFile>
+    <StartupFile>Run_TCE.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,10 +25,16 @@
     <Compile Include="Data.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RunTCE.py">
+    <Compile Include="Run_TCE.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test\unit_test_trainSet.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TrainCharacterExtractor.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="test\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

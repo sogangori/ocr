@@ -7,7 +7,7 @@ ocr.isFigure = True
 #ocr.isShowLocalMin = True
 ocr.isShowLetterHeight = True
 
-ocr.ReadImage(Data.path2)
+ocr.Read(Data.path2)
 ocr.ResizeIfBig()
 ocr.GetCutIndexs() 
 ocr.GetRotations()
