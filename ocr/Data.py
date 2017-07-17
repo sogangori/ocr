@@ -1,4 +1,4 @@
-folder = 'c:/Users/pc/Desktop/paper/OCR/image/'       
+﻿folder = './data/'       
 path0 = folder+'sample0.jpg'
 path1 = folder+'sample2.jpg'
 path2 = folder+'sample1.jpeg'  
