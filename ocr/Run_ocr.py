@@ -4,14 +4,15 @@ import Data
 
 ocr = OCR_Pre()
 ocr.isFigure = True
-ocr.isShowLocalMin = True
+#ocr.isShowLocalMin = True
 ocr.isShowLetterHeight = True
 
-ocr.ReadImage(Data.path0)
+ocr.ReadImage(Data.path2)
 ocr.ResizeIfBig()
 ocr.GetCutIndexs() 
 ocr.GetRotations()
 ocr.CutPaddings()
+#ocr.RemoveLines()
 ocr.GetLetterSizes()
 ocr.SlideCandidateRow()
 plt.show()

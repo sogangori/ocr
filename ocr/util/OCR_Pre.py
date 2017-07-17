@@ -175,8 +175,28 @@ class OCR_Pre():
 
         return self.cut_src
 
+    def RemoveLine(self, src):
+        sobelH = ndimage.sobel(src, 0)
+        sobelV = ndimage.sobel(src, 1)
+        if self.isFigure:
+            plt.figure(2)
+            plt.title('sobelH')
+            plt.imshow(sobelH)            
+            plt.figure(3)
+            plt.title('sobelVertival')
+            plt.imshow(sobelV)        
+
+    def RemoveLines(self):
+        srcList = self.cut_src
+        for i in range(len(srcList)):
+            self.RemoveLine(srcList[i])
+
     def GetLetterSize(self, src):    
+        lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
         sum_col = np.sum(src, axis=1)
+        #sum_col = np.convolve(sum_col,lpf,'same')
+        sum_col = np.convolve(sum_col,lpf,'valid')
+        #sum_col = np.convolve(sum_col,lpf,'valid')
         under = np.zeros_like(sum_col)
         under[:-1] = sum_col[1:]
         deriv = under-sum_col    
@@ -185,13 +205,16 @@ class OCR_Pre():
         i0 = 0
         pillas = []
         pillas_offset = []        
-                
+                        
         for i in range(len(deriv)-1):
-            if sum_col[i]<sum_col_mean/3 and ((deriv[i]< 0 and deriv[i+1]>0) or (deriv[i]== 0 and deriv[i+1]>0)):
+            #if sum_col[i]<sum_col_mean/2 and ((deriv[i]< 0 and deriv[i+1]>0) or (deriv[i]== 0 and deriv[i+1]>0)):
+            if deriv[i]== 0 and deriv[i+1]==0:
+                continue
+            elif sum_col[i]<sum_col_mean/1 and (deriv[i]<= 0 and deriv[i+1]>0):
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 pillas_offset.append(i)
-                print ('row', i, pilla_w)
+                print ('row',i0,'~', i,'w:', pilla_w)
                 i0 = i
     
         print ('pillar_count ',len(pillas))
@@ -201,28 +224,24 @@ class OCR_Pre():
         mean_simmilar_sum=0
         mean_simmilar_sum_count=0
         print ('pilla_arr',pilla_arr.shape,pilla_mean, pilla_std)
-        pilla_arr2 =[]
+        candidate2Index=0
+        font_offset = []
+        y0 = 0
         for i in range(len(pillas)):
             v = pilla_arr[i]
+            y1 = pillas_offset[i]
+            if i>0: y0 = pillas_offset[i-1]
             if v > pilla_mean- pilla_std and v < pilla_mean+ pilla_std :
                 mean_simmilar_sum +=v
                 mean_simmilar_sum_count+=1
-                self.font_offsets_y.append(pillas_offset[i])
-                pilla_arr2.append(v)
-                print ('font row',i, pillas_offset[i], v)
+                font_offset.append(pillas_offset[i])                                
+                print ('font row',i,candidate2Index, 'y:',y0,'~',y1, v)
+                candidate2Index+=1
             #else: //TODO
-    
+        self.font_offsets_y.append(font_offset)
         letterH = (int)(mean_simmilar_sum/mean_simmilar_sum_count)
         print ('letterSizeCandidate',letterH,mean_simmilar_sum,mean_simmilar_sum_count)
-
-        pilla_std2 = np.std(pilla_arr2)
-        candidate2Index=0
-        for i in range(len(pillas)):
-            v = pilla_arr[i]
-            if v > letterH - pilla_std2 and v < letterH + pilla_std2 :                
-                print ('* font row',candidate2Index, pillas_offset[i], v)
-                candidate2Index+=1
-
+        
         self.letterSizeCandidate.append(letterH)
         if self.isFigure and self.isShowLetterHeight:
             plt.figure(1)
@@ -237,7 +256,7 @@ class OCR_Pre():
         print ('font_offsets_y',font_offsets_y)
         for i in range(len(font_offsets_y)):
             y = font_offsets_y[i]
-            for x in range((int)(w/10)):            
+            for x in range((int)(w/30)):            
                 patch = src[y:y+patchSize, x:x+patchSize]
                 patch_sum = np.sum(patch)
                 if patch_sum>patchSize:
@@ -245,8 +264,7 @@ class OCR_Pre():
                     plt.ylabel(y)
                     plt.draw()
                     plt.pause(0.001) 
-                    #plt.show()
-        return 0
+                    #plt.show()        
 
     def GetLetterSizes(self):
         srcList = self.cut_src
@@ -260,7 +278,7 @@ class OCR_Pre():
             src = srcList[i]
             self.font_offsets_y.clear()
             self.GetLetterSize(src)
-            self.SlideWindow(src,self.font_offsets_y, self.letterSizeCandidate[i])
+            self.SlideWindow(src,self.font_offsets_y[i], self.letterSizeCandidate[i])
 
     def Normalize(self, src):
         dst = (src - np.min(src)) / (np.max(src)-np.min(src))

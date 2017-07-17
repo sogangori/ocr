@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "ocr", "ocr\ocr.pyproj", "{F2F45A79-10DF-4BB6-A6E5-7B4E2A3DDDB9}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TrainingCharacterExtractor", "TrainingCharacterExtractor\TrainingCharacterExtractor.pyproj", "{2AF72E32-ECFC-4A92-A992-43503FA1FE77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F2F45A79-10DF-4BB6-A6E5-7B4E2A3DDDB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F2F45A79-10DF-4BB6-A6E5-7B4E2A3DDDB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AF72E32-ECFC-4A92-A992-43503FA1FE77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF72E32-ECFC-4A92-A992-43503FA1FE77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
