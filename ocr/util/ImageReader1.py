@@ -7,7 +7,7 @@ import numpy.linalg as li
 
 local_min_offset_ratio = 0.75
 isShowLocalMin = not True
-isShowPatch = not True
+isShowLetterHeight = not True
 
 def GetRotation(src):    
     #angle = li.eig(src)
@@ -154,7 +154,8 @@ def GetLetterSize(src):
     
     letterSizeCandidate = mean_simmilar_sum/mean_simmilar_sum_count
     print ('letterSizeCandidate',letterSizeCandidate,mean_simmilar_sum_count)
-    if isShowPatch:
+    if isShowLetterHeight:
+        plt.close()
         plt.figure(1)
         plt.plot(sum_col)    
         plt.show()
