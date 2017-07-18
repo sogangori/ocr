@@ -74,11 +74,10 @@ class OCR_Pre():
         maxAngle = 0
         maxMean = 0
         ratate_step = 0.5
-        angle_min = -30
-        angle_max = 30
+        angle_min = -10
+        angle_max = 10
         angles = []
-        for i in range(angle_min,angle_max):
-            angle = i*ratate_step            
+        for angle in np.arange(angle_min,angle_max,ratate_step):            
             image_rot = image.rotate(angle)
             src = np.asarray(image_rot)
             mean_1 = np.mean(np.std(src, axis=1))
@@ -86,7 +85,7 @@ class OCR_Pre():
             elsilon = 0.1
             mean = 1/(mean_1+elsilon) * 1/(mean_2+elsilon)
             if mean > maxMean :
-                #print ('rotate angle',angle,'mean',mean)
+                print ('rotate angle',angle,'mean',mean)
                 maxMean  = mean
                 maxAngle = angle
 

@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from TrainCharacterExtractor import TrainCharacterExtractor
 import Data
 
@@ -9,12 +9,12 @@ class Test_TrainingData(unittest.TestCase):
        gt = Data.angle_GT
        
        cls.Read(Data.path0)       
-       angle = cls.GetRotationAngle()       
-       self.assertEquals(angle,gt[0])       
+       angle = cls.GetRotationAngle()              
+       self.assertAlmostEquals(angle,gt[0])              
 
        cls.Read(Data.path1)       
        angle = cls.GetRotationAngle()       
-       self.assertEquals(angle,gt[1])       
+       self.assertAlmostEquals(angle,gt[1])       
 
    def test_grid(self):
        cls = TrainCharacterExtractor()
@@ -23,7 +23,7 @@ class Test_TrainingData(unittest.TestCase):
        cls.Read(Data.path0)       
        cls.GetRotationAngle()  
        cls.GetGrid()          
-       self.assertEquals(len(cls.font_offsets_x),gt[0][1])
+       self.assertEquals(len(cls.font_offsets_x),gt[0][1])#51,50
        self.assertEquals(len(cls.font_offsets_y),gt[0][0])
 
        cls.Read(Data.path1)       

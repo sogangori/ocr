@@ -33,8 +33,8 @@ class TrainCharacterExtractor():
         maxAngle = 0
         maxMean = 0
         ratate_step = 0.02
-        angle_min = -1
-        angle_max = 1
+        angle_min = -1.0
+        angle_max = 1.0
         angles = []
         for angle in np.arange(angle_min,angle_max, ratate_step):
         #for i in range(angle_min,angle_max):
@@ -114,10 +114,8 @@ class TrainCharacterExtractor():
                 list.append(i)
         
         print ('size ',self.grayArr.shape)
-        print ('pillar_count ',len(pillas))
-        pilla_arr = np.array(pillas)
-        pilla_std = np.std(pilla_arr)
-        pilla_mean = np.mean(pilla_arr)
+        print ('pillar_count ',len(pillas))        
+        pilla_mean = np.mean(np.array(pillas))
                 
         letterH = (int)(pilla_mean)
         print ('cell_h',letterH)
@@ -141,6 +139,26 @@ class TrainCharacterExtractor():
         self.GetLetterSize(0)
         self.GetLetterSize(1)
     
-   
+    def GetGridCell(self):
+        rows = len(self.font_offsets_y)
+        cols = len(self.font_offsets_x)
+        print('rows:',rows,'cols',cols)
+        if self.isFigure:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
+            subplot_index = 1
+            for y in range(2):
+                for x in range(2):
+                    y0 = self.font_offsets_y[y]
+                    y1 = self.font_offsets_y[y+1] + 1
+                    x0 = self.font_offsets_x[x]
+                    x1 = self.font_offsets_x[x+1] + 1
+                    gridCell = self.gridArr[y0:y1,x0:x1]
+                    imgCell = Image.fromarray(gridCell)            
+                    plt.subplot(2,2,subplot_index)
+                    subplot_index+=1
+                    print('y0,y1,x0,x1',y0,y1,x0,x1)
+                    plt.title('cell'+str(y)+'/'+str(x))
+                    plt.imshow(imgCell, cmap = plt.get_cmap('gray'))
         return 0
 

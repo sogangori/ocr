@@ -32,17 +32,17 @@ class Test_test1(unittest.TestCase):
        ocr.Read(Data.path0)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,gt[0])
+       self.assertAlmostEquals(angles,gt[0])
               
        ocr.Read(Data.path1)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,gt[1])
+       self.assertAlmostEquals(angles,gt[1])
 
        ocr.Read(Data.path2)       
        ocr.GetCutIndexs()
        angles = ocr.GetRotations()       
-       self.assertEquals(angles,gt[2])
+       self.assertAlmostEquals(angles,gt[2])
 
    def test_row_count1(self):
        ocr = OCR_Pre()
