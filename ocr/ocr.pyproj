@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f2f45a79-10df-4bb6-a6e5-7b4e2a3dddb9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Run_ocr.py</StartupFile>
+    <StartupFile>test\Test_Range.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -30,6 +30,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test\TestFor.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test\Test_Range.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test\unit_test_ocr_pre.py">

@@ -30,7 +30,7 @@ class Test_TrainingData(unittest.TestCase):
        cls.GetRotationAngle()  
        cls.GetGrid()          
        self.assertEquals(len(cls.font_offsets_x),gt[1][1])
-       self.assertEquals(len(cls.font_offsets_y),gt[1][0])#34!=24
+       self.assertEquals(len(cls.font_offsets_y),gt[1][0])
     
    def test_cell(self):
        cls = TrainCharacterExtractor()
