@@ -4,7 +4,7 @@ import sys
 import tensorflow as tf
 import model.model_helper as helper
 
-modelName = "../weights/model_layer6.pd"
+modelName = "./weights/model_layer6.pd"
 LABEL = 1700
 channel = 36
 
@@ -27,7 +27,7 @@ with tf.variable_scope('smap'):
     w32c = tf.get_variable("conv3_2", shape=[3, 3, channel, LABEL], initializer =tf.contrib.layers.xavier_initializer())
     w32b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
 
-    w41f = tf.Variable(tf.random_normal([2*2*channel,LABEL]))
+    w41f = tf.Variable(tf.random_normal([6800,LABEL]))
     w41b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
 
 def inference(input, train):
@@ -38,15 +38,20 @@ def inference(input, train):
     pool = helper.conv2dRelu(pool,w12c,w12b)   
     pool = helper.max_pool_2(pool)    
 
-    pool = helper.conv2dRelu(input,w21c,w21b)
+    pool = helper.conv2dRelu(pool,w21c,w21b)
     pool = helper.conv2dRelu(pool,w22c,w22b)   
     pool = helper.max_pool_2(pool)     
         
-    pool = helper.conv2dRelu(input,w31c,w31b)
+    pool = helper.conv2dRelu(pool,w31c,w31b)
     pool = helper.conv2dRelu(pool,w32c,w32b)   
     pool = helper.max_pool_2(pool)    
 
-    pool = tf.matmul(pool, w41f)
-    pool = tf.add(pool, w41b)
+    shape = pool.get_shape().as_list()
+    dim = 1
+    for d in shape[1:]:
+        dim *= d
+    pool = tf.reshape(pool, [-1, dim])
+    pool = tf.matmul(pool, w41f)    
+    pool = tf.nn.bias_add(pool, w41b)
         
     return pool; 

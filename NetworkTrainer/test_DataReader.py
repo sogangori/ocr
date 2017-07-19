@@ -1,4 +1,4 @@
-﻿from util.DataReader import DataReader
+﻿from util.data_reader import DataReader
 import numpy as np
 
 trainData = DataReader();

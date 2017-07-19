@@ -1,4 +1,4 @@
-import tensorflow as tf
+﻿import tensorflow as tf
 import time
 import numpy as np
 
@@ -16,7 +16,7 @@ def resize(src, dstH, dstW,interpol = 1):
     else: return tf.image.resize_bicubic(src, [dstH, dstW])
 
 def conv2d(src, weights, bias):
-    src = dropout(src)
+    
     conv = tf.nn.conv2d(src,weights,strides=[1, 1, 1, 1],padding='SAME')
     return tf.nn.bias_add(conv,bias)
 
@@ -26,7 +26,7 @@ def conv2dRelu(src, weights, bias):
     return tf.nn.relu(conv) 
 
 def conv2dReluStride2(src, weights, bias):
-    src = dropout(src)
+    
     conv = tf.nn.conv2d(src,weights,strides=[1, 2, 2, 1],padding='SAME')
     conv = tf.nn.bias_add(conv,bias)
     return tf.nn.relu(conv) 
@@ -59,7 +59,7 @@ def upConvRelu(src, weights, bias,up_shape):
     return tf.nn.relu(output) 
 
 def depthwiseConv2dRelu(src, weights, bias):
-    src = dropout(src)
+    
     output = tf.nn.depthwise_conv2d(src,weights,strides=[1,1,1,1],padding='SAME')
     output = tf.nn.bias_add(output, bias)
     output = tf.nn.relu(output)
@@ -89,7 +89,7 @@ def batch_norm(src, beta, gamma, isTrain):
     return tf.nn.batch_normalization(src, mean,var, beta, gamma,1e-3)
 
 def conv2dBN(src, weights, beta,gamma):
-    src = dropout(src)
+    
     conv = tf.nn.conv2d(src,weights,strides=[1, 1, 1, 1],padding='SAME')
     return batchNormal(conv,beta,gamma)
 
@@ -104,7 +104,7 @@ def avg_pool_resize(src, step):
     elif step%3==2:src= tf.nn.avg_pool(src,pool_stride3,strides=pool_stride3,padding='SAME')
     return src
 
-def max_pool_2(src, stride):
+def max_pool_2(src):
     return tf.nn.max_pool(src,[1, 2, 2, 1],strides=[1, 2, 2, 1],padding='SAME')    
 
 def bilinear_resize(src, step):

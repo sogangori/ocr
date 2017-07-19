@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f995b91d-3485-48ca-b487-215ff04dcc6d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>test_DataReader.py</StartupFile>
+    <StartupFile>Trainer.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,14 +22,25 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="model\model_helper.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\model_layer7.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="model\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="util\DataReader.py">
+    <Compile Include="Trainer.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="NetworkTrainer.py" />
+    <Compile Include="util\data_reader.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="test_DataReader.py" />
+    <Compile Include="util\trainer_helper.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="util\__init__.py">
       <SubType>Code</SubType>
     </Compile>

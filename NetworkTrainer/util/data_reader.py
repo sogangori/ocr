@@ -1,4 +1,4 @@
-from PIL import Image
+﻿from PIL import Image
 import numpy as np
 from scipy.misc import toimage
 import glob
@@ -18,7 +18,7 @@ class DataReader():
     def ReadFolder(self, path):
         
         list_path = glob.glob(path)                                
-        count = len(list_path)
+        count = len(list_path)        
         print ('ReadFolder() count', len(list_path))
         list_image = []
                 
