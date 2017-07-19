@@ -23,8 +23,8 @@ class Test_TrainingData(unittest.TestCase):
        cls.Read(Data.path0)       
        cls.GetRotationAngle()  
        cls.GetGrid()          
-       self.assertEquals(len(cls.font_offsets_x),gt[0][1])#51,50
-       self.assertEquals(len(cls.font_offsets_y),gt[0][0])
+       self.assertEquals(len(cls.font_offsets_x)-1,gt[0][1])#51,50
+       self.assertEquals(len(cls.font_offsets_y)-1,gt[0][0])#31,32
 
        cls.Read(Data.path1)       
        cls.GetRotationAngle()  

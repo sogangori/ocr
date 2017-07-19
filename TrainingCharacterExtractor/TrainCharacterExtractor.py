@@ -21,12 +21,22 @@ class TrainCharacterExtractor():
         self.font_offsets_y.clear()
         self.font_offsets_x.clear()
 
+    def Binarize(self,src):
+        shp = src.shape
+        delete_count = 0
+        for y in range(shp[0]):
+            for x in range(shp[1]):
+                v = 0
+                if src[y,x]>128: v = 255                    
+                src[y,x] = v
+
     def Read(self, path):
         self.Reset()
         img = Image.open(path)
         grayImg = img.convert('L')
         self.grayImg = PIL.ImageOps.invert(grayImg)
-        self.grayArr = np.asarray(self.grayImg).copy()        
+        self.grayArr = np.asarray(self.grayImg).copy()       
+        self.Binarize(self.grayArr) 
 
     def ClearByThreshold(self):
         shp = self.grayArr.shape
@@ -69,8 +79,9 @@ class TrainCharacterExtractor():
 
         print ('max Angle',maxAngle,'maxMean',maxMean)
         if maxAngle!=0:
-            self.grayImg = image.rotate(maxAngle)
+            self.grayImg = image.rotate(maxAngle, resample=Image.BICUBIC)
             self.grayArr = np.asarray(self.grayImg).copy()
+            #self.Binarize(self.grayArr) # No!
             #self.ClearByThreshold()
 
         self.gridArr = np.asarray(self.grayImg).copy()
@@ -106,11 +117,17 @@ class TrainCharacterExtractor():
         i0 = 0
         pillas = []        
         candidate2Index = 0                
-                        
+        list.append(0)
         for i in range(1,len(deriv)-1):            
-            if deriv[i]== 0 and deriv[i+1]==0:
+            if i== len(deriv)-2:
+                pilla_w = i-i0
+                pillas.append(pilla_w)
+                list.append(i)
+                if axis==1: self.gridArr[i,:] = 255
+                else : self.gridArr[:,i] = 255
+            elif deriv[i-1]== 0 and deriv[i]==0:
                 continue
-            elif sum_col[i]<sum_col_mean/1 and (deriv[i-1]<= 0 and deriv[i]>0):
+            elif sum_col[i]<sum_col_mean/1 and (deriv[i-1]<= 0 and deriv[i]>0.5):
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 list.append(i)
@@ -120,10 +137,6 @@ class TrainCharacterExtractor():
                 if axis==1: self.gridArr[i,:] = 255
                 else : self.gridArr[:,i] = 255
                 
-            if i== len(deriv)-1:
-                pilla_w = i-i0
-                pillas.append(pilla_w)
-                list.append(i)
         
         print ('size ',self.grayArr.shape)
         print ('pillar_count ',len(pillas))        
@@ -159,22 +172,24 @@ class TrainCharacterExtractor():
         y1 = len(sumRow)
         x0 = 0
         x1 = len(sumCol)
+        threshold = np.mean(sumRow)/3
         for y in range(len(sumRow)):
-            if sumRow[y]>0 : 
+            if sumRow[y]> threshold : 
                 y0 = y
                 break;
         for y in range(len(sumRow)):
             index = len(sumRow)-1-y
-            if sumRow[index]>0 : 
+            if sumRow[index]> threshold : 
                 y1 = index
                 break;        
+        threshold = np.mean(sumCol)/3
         for x in range(len(sumCol)):
-            if sumCol[x]>0 : 
+            if sumCol[x]> threshold : 
                 x0 = x
                 break;
         for x in range(len(sumCol)):
             index = len(sumCol)-1-x
-            if sumCol[index]>0 : 
+            if sumCol[index]> threshold : 
                 x1 = index
                 break;
         dst = src[y0:y1+1,x0:x1+1]
@@ -183,18 +198,22 @@ class TrainCharacterExtractor():
         print ('cut', y0,y1,x0,x1)
         return dst
     
-    def GetGridCell(self):
+    def ShowGridCell(self):
         rows = len(self.font_offsets_y)
         cols = len(self.font_offsets_x)
         print('rows:',rows,'cols',cols)
         if self.isFigure:
             plt.figure(self.index_figure)            
             self.index_figure+=1
-            subplot_index = 1
+            subRow = 4
+            subCol = 4
             lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
-            #lpf = [0,0.1,0.2,0.3,0.2,0.1,0]        
-            for y in range(1):
-                for x in range(2):
+            #lpf = [0,0.1,0.2,0.3,0.2,0.1,0]
+            for iter in range(10):
+                subplot_index = 1
+                for i in range(subRow):
+                    y = np.random.randint(0, rows-1)
+                    x = np.random.randint(0, cols-1)                    
                     y0 = self.font_offsets_y[y]
                     y1 = self.font_offsets_y[y+1] + 1
                     x0 = self.font_offsets_x[x]
@@ -205,25 +224,70 @@ class TrainCharacterExtractor():
                     print ('cellChar',cellChar.shape)
                     imgCell = Image.fromarray(gridCell)            
                     imgChar = Image.fromarray(cellChar)
-                    plt.subplot(2,3,subplot_index)
+                    plt.subplot(subRow,subCol,subplot_index)
                     subplot_index+=1
                     plt.title('cell'+str(y)+'/'+str(x)+str(gridCell.shape))
                     plt.imshow(imgCell, cmap = plt.get_cmap('gray'))
-                    plt.subplot(2,3,subplot_index)
+
+                    plt.subplot(subRow,subCol,subplot_index)
                     subplot_index+=1
                     plt.title('cell'+str(y)+'/'+str(x)+str(cellChar.shape))
-                    #plt.imshow(imgChar, cmap = plt.get_cmap('gray'))
+                    plt.imshow(imgChar, cmap = plt.get_cmap('gray'))
+
+                    plt.subplot(subRow,subCol,subplot_index)
+                    subplot_index+=1
                     sum_row = np.sum(gridCell, axis=0)
                     sum_row_conv = np.convolve(sum_row,lpf,'same')
+                    
+                    plt.title('sum_row'+str(np.mean(sum_row)/3))
+                    #plt.axis([0, len(sum_row), np.mean(sum_row)/3, np.max(sum_row)])                    
                     plt.plot(sum_row)
                     plt.plot(sum_row_conv)
 
-                    plt.subplot(2,3,subplot_index)
+                    plt.subplot(subRow,subCol,subplot_index)
                     subplot_index+=1                    
                     sum_col = np.sum(gridCell, axis=1)
                     sum_col_conv = np.convolve(sum_col,lpf,'same')
                     plt.plot(sum_col)
                     plt.plot(sum_col_conv)
+                plt.show()
 
         return 0
+
+    def ShowGridBorder(self):
+        rows = len(self.font_offsets_y)
+        cols = len(self.font_offsets_x)
+        print('rows:',rows,'cols',cols)
+        if self.isFigure:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
+            lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
+            #lpf = [0,0.1,0.2,0.3,0.2,0.1,0]
+            coordinate = [[0,0],[0,1], [0,cols-3],[0,cols-2], 
+                          [rows-2,0],[rows-2,1], [rows-2,cols-3], [rows-2,cols-2]]            
+            subCol = len(coordinate)
+            subRow = 2            
+            for i in range(len(coordinate)):
+                print ('i',i,coordinate)
+                y = coordinate[i][0]
+                x = coordinate[i][1]
+                y0 = self.font_offsets_y[y]
+                y1 = self.font_offsets_y[y+1] + 1
+                x0 = self.font_offsets_x[x]
+                x1 = self.font_offsets_x[x+1] + 1
+                print('y0,y1,x0,x1',y0,y1,x0,x1)
+                gridCell = self.grayArr[y0:y1,x0:x1]
+                cellChar = self.RemovePadding(gridCell)
+                print ('cellChar',cellChar.shape)
+                imgCell = Image.fromarray(gridCell)            
+                imgChar = Image.fromarray(cellChar)
+                plt.subplot(subRow,subCol,1+i)
+                plt.title('cell'+str(y)+'/'+str(x)+str(gridCell.shape))
+                plt.imshow(imgCell, cmap = plt.get_cmap('gray'))
+
+                plt.subplot(subRow,subCol,subCol + 1+i)                
+                plt.title('cell'+str(y)+'/'+str(x)+str(cellChar.shape))
+                plt.imshow(imgChar, cmap = plt.get_cmap('gray'))                                
+                    
+            plt.show()
 

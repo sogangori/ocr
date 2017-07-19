@@ -5,8 +5,8 @@ import Data
 tce = TrainCharacterExtractor()
 tce.isFigure = True
 
-tce.Read(Data.path1)
+tce.Read(Data.path0)
 tce.GetRotationAngle()
 tce.GetGrid()
-tce.GetGridCell()
+tce.ShowGridBorder()
 plt.show()
