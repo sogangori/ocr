@@ -3,6 +3,7 @@ import PIL.ImageOps
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
+import os
 
 class TrainCharacterExtractor():
     grayImg = 0
@@ -118,26 +119,20 @@ class TrainCharacterExtractor():
         pillas = []        
         candidate2Index = 0                
         list.append(0)
-        for i in range(1,len(deriv)-1):            
-            if i== len(deriv)-2:
-                pilla_w = i-i0
-                pillas.append(pilla_w)
-                list.append(i)
-                if axis==1: self.gridArr[i,:] = 255
-                else : self.gridArr[:,i] = 255
-            elif deriv[i-1]== 0 and deriv[i]==0:
+        for i in range(1,len(deriv)):            
+            
+            if deriv[i-1]== 0 and deriv[i]==0:
                 continue
-            elif sum_col[i]<sum_col_mean/1 and (deriv[i-1]<= 0 and deriv[i]>0.5):
+            elif (sum_col[i]<sum_col_mean/1 and (deriv[i-1]<= 0 and deriv[i]>0.5)) or i== len(deriv)-1:
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 list.append(i)
                 #print ('axis',axis,candidate2Index, i0,'~', i,'w:', pilla_w)
                 i0 = i
                 candidate2Index+=1
-                if axis==1: self.gridArr[i,:] = 255
-                else : self.gridArr[:,i] = 255
+                if axis==1: self.gridArr[i,::2] = 255
+                else : self.gridArr[::2,i] = 255
                 
-        
         print ('size ',self.grayArr.shape)
         print ('pillar_count ',len(pillas))        
         pilla_mean = np.mean(np.array(pillas))
@@ -193,9 +188,9 @@ class TrainCharacterExtractor():
                 x1 = index
                 break;
         dst = src[y0:y1+1,x0:x1+1]
-        print ('sum axis=1',y0,'~',y1,sumRow)
-        print ('sum axis=0',x0,'~',x1,sumCol)
-        print ('cut', y0,y1,x0,x1)
+        #print ('sum axis=1',y0,'~',y1,sumRow)
+        #print ('sum axis=0',x0,'~',x1,sumCol)
+        #print ('cut', y0,y1,x0,x1)
         return dst
     
     def ShowGridCell(self):
@@ -226,7 +221,8 @@ class TrainCharacterExtractor():
                     imgChar = Image.fromarray(cellChar)
                     plt.subplot(subRow,subCol,subplot_index)
                     subplot_index+=1
-                    plt.title('cell'+str(y)+'/'+str(x)+str(gridCell.shape))
+                    gridCell_mean = np.mean(gridCell)
+                    plt.title(str(y)+'/'+str(x)+str(gridCell.shape)+' '+gridCell_mean)
                     plt.imshow(imgCell, cmap = plt.get_cmap('gray'))
 
                     plt.subplot(subRow,subCol,subplot_index)
@@ -260,9 +256,7 @@ class TrainCharacterExtractor():
         print('rows:',rows,'cols',cols)
         if self.isFigure:
             plt.figure(self.index_figure)            
-            self.index_figure+=1
-            lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
-            #lpf = [0,0.1,0.2,0.3,0.2,0.1,0]
+            self.index_figure+=1        
             coordinate = [[0,0],[0,1], [0,cols-3],[0,cols-2], 
                           [rows-2,0],[rows-2,1], [rows-2,cols-3], [rows-2,cols-2]]            
             subCol = len(coordinate)
@@ -282,12 +276,48 @@ class TrainCharacterExtractor():
                 imgCell = Image.fromarray(gridCell)            
                 imgChar = Image.fromarray(cellChar)
                 plt.subplot(subRow,subCol,1+i)
-                plt.title('cell'+str(y)+'/'+str(x)+str(gridCell.shape))
+                gridCell_mean = np.int(np.mean(gridCell))
+                plt.title(str(y)+'/'+str(x)+str(gridCell.shape)+' m'+str(gridCell_mean))
                 plt.imshow(imgCell, cmap = plt.get_cmap('gray'))
-
+                cellChar_mean = np.int(np.mean(cellChar))
                 plt.subplot(subRow,subCol,subCol + 1+i)                
-                plt.title('cell'+str(y)+'/'+str(x)+str(cellChar.shape))
+                plt.title(str(y)+'/'+str(x)+str(cellChar.shape)+ ' m'+str(cellChar_mean))
                 plt.imshow(imgChar, cmap = plt.get_cmap('gray'))                                
                     
             plt.show()
+
+    def SaveGridCharacter(self, folder):
+
+        rows = len(self.font_offsets_y)
+        cols = len(self.font_offsets_x)
+        print('rows:',rows,'cols',cols)
+        
+        coordinate = [[0,0],[0,1], [0,cols-3],[0,cols-2], 
+                        [rows-2,0],[rows-2,1], [rows-2,cols-3], [rows-2,cols-2]]            
+        
+        list_character = []
+        for y in range(rows-1):
+            for x in range(cols-1):
+                print (len(list_character),'y:',y,'x:',x)                
+                y0 = self.font_offsets_y[y]
+                y1 = self.font_offsets_y[y+1] + 1
+                x0 = self.font_offsets_x[x]
+                x1 = self.font_offsets_x[x+1] + 1
+                #print('y0,y1,x0,x1',y0,y1,x0,x1)
+                gridCell = self.grayArr[y0:y1,x0:x1]
+                gridCell_mean = np.mean(gridCell)
+                if gridCell_mean > 2:
+                    cellChar = self.RemovePadding(gridCell)
+                    print ('cellChar',cellChar.shape)
+                    imgCell = Image.fromarray(gridCell)            
+                    list_character.append(cellChar)
+        print ('list_character',len(list_character))
+
+        if not os.path.exists(folder):os.makedirs(folder)
+        for i in range(len(list_character)):
+            imgChar = Image.fromarray(list_character[i])
+            fileName = folder+str(i)+".png"
+            print ('save',i, fileName)
+
+            imgChar.save(fileName)
 
