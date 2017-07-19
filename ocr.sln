@@ -7,6 +7,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "ocr", "ocr\ocr.pyproj", "{F
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TrainingCharacterExtractor", "TrainingCharacterExtractor\TrainingCharacterExtractor.pyproj", "{2AF72E32-ECFC-4A92-A992-43503FA1FE77}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "NetworkTrainer", "NetworkTrainer\NetworkTrainer.pyproj", "{F995B91D-3485-48CA-B487-215FF04DCC6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,8 @@ Global
 		{F2F45A79-10DF-4BB6-A6E5-7B4E2A3DDDB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AF72E32-ECFC-4A92-A992-43503FA1FE77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2AF72E32-ECFC-4A92-A992-43503FA1FE77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F995B91D-3485-48CA-B487-215FF04DCC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F995B91D-3485-48CA-B487-215FF04DCC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

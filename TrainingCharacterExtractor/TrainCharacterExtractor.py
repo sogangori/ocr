@@ -282,9 +282,7 @@ class TrainCharacterExtractor():
                 cellChar_mean = np.int(np.mean(cellChar))
                 plt.subplot(subRow,subCol,subCol + 1+i)                
                 plt.title(str(y)+'/'+str(x)+str(cellChar.shape)+ ' m'+str(cellChar_mean))
-                plt.imshow(imgChar, cmap = plt.get_cmap('gray'))                                
-                    
-            plt.show()
+                plt.imshow(imgChar, cmap = plt.get_cmap('gray'))                                                    
 
     def SaveGridCharacter(self, folder):
 
