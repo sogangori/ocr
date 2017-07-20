@@ -5,8 +5,8 @@ import tensorflow as tf
 import model.model_helper as helper
 
 modelName = "./weights/model_layer6.pd"
-LABEL = 1700
-channel = 36
+LABEL = 2350
+channel = 48
 
 with tf.variable_scope('smap'):
     w11c  = tf.get_variable("conv1_1", shape=[3, 3, 1, channel], initializer =tf.contrib.layers.xavier_initializer())
@@ -27,7 +27,8 @@ with tf.variable_scope('smap'):
     w32c = tf.get_variable("conv3_2", shape=[3, 3, channel, LABEL], initializer =tf.contrib.layers.xavier_initializer())
     w32b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
 
-    w41f = tf.Variable(tf.random_normal([6800,LABEL]))
+    w41f = tf.Variable(tf.random_normal([2350,LABEL]))
+    #w41f = tf.get_variable("fc4_1", shape=[2350,LABEL], initializer =tf.contrib.layers.xavier_initializer())
     w41b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
 
 def inference(input, train):
@@ -35,14 +36,17 @@ def inference(input, train):
     #pool = helper.Gaussian_noise_Add(pool, 0.1, 0.3)
 
     pool = helper.conv2dRelu(input,w11c,w11b)
+    pool = helper.max_pool_2(pool)
     pool = helper.conv2dRelu(pool,w12c,w12b)   
     pool = helper.max_pool_2(pool)    
 
     pool = helper.conv2dRelu(pool,w21c,w21b)
+    pool = helper.max_pool_2(pool)
     pool = helper.conv2dRelu(pool,w22c,w22b)   
-    pool = helper.max_pool_2(pool)     
+    pool = helper.max_pool_2(pool)
         
     pool = helper.conv2dRelu(pool,w31c,w31b)
+    pool = helper.max_pool_2(pool)   
     pool = helper.conv2dRelu(pool,w32c,w32b)   
     pool = helper.max_pool_2(pool)    
 
@@ -51,7 +55,7 @@ def inference(input, train):
     for d in shape[1:]:
         dim *= d
     pool = tf.reshape(pool, [-1, dim])
-    pool = tf.nn.dropout(pool, 0.5)
+    #pool = tf.nn.dropout(pool, 0.9)
     pool = tf.matmul(pool, w41f)    
     pool = tf.nn.bias_add(pool, w41b)
         

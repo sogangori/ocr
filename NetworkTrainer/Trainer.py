@@ -12,9 +12,9 @@ from util.data_reader import DataReader
 import util.trainer_helper as helper
 
 DataReader = DataReader()
-EVAL_FREQUENCY = 5
-NUM_EPOCHS = 100
-isNewTrain = not True      
+EVAL_FREQUENCY = 2
+NUM_EPOCHS = 1000
+isNewTrain = True      
 
 def main(argv=None):        
       
@@ -23,7 +23,8 @@ def main(argv=None):
   testIn = np.expand_dims(testIn,axis=3)
   trainIn = trainIn/255.0    
   testIn = testIn/255.0
-
+  iter_count = 4
+  batch = (int)(trainIn.shape[0]/iter_count)    
   X = tf.placeholder(tf.float32, [None,trainIn.shape[1],trainIn.shape[2],1])
   Y = tf.placeholder(tf.int32, [None])
   IsTrain = tf.placeholder(tf.bool)  
@@ -34,10 +35,9 @@ def main(argv=None):
   acc = tf.reduce_mean(tf.cast(tf.equal(argMax, Y), tf.float32))
   entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = predict, labels = Y))  
   loss = entropy + 1e-5 * helper.regularizer()      
-  LearningRate = 0.001    
+  LearningRate = 0.1    
   optimizer = tf.train.AdamOptimizer(LearningRate).minimize(loss) 
   
-
   with tf.Session() as sess:    
     tf.global_variables_initializer().run()    
     saver = tf.train.Saver()      
@@ -48,22 +48,20 @@ def main(argv=None):
 
     sess.run(tf.local_variables_initializer())  
         
-    feed_dict = {X: trainIn, Y: trainOut, IsTrain:True}       
-    feed_dict_test = {X: testIn, Y: testOut, IsTrain :False}
     start_sec = start_time = time.time()
-    for step in xrange(NUM_EPOCHS):
-            
-        _,l, accr = sess.run([optimizer,entropy, acc], feed_dict)          
-        now = strftime("%H:%M:%S", localtime())
+    for step in range(NUM_EPOCHS):
+        
+        for iter in range(iter_count):
+            offset = iter * batch
+            feed_dict = {X: trainIn[offset:offset+batch], Y: trainOut[offset:offset+batch], IsTrain:True}       
+            _,l, accr = sess.run([optimizer,entropy, acc], feed_dict)          
+            now = strftime("%H:%M:%S", localtime())
                                 
         if step % EVAL_FREQUENCY == 0:            
+            feed_dict_test = {X: testIn[offset:offset+batch], Y: testOut[offset:offset+batch], IsTrain :False}
             l_v, accr_v = sess.run([entropy,acc], feed_dict_test)        
-            print('%d, acc(%.3f,%.3f), entropy (%.4f,%.4f), %s' % (step,accr,accr_v, l, l_v,now))             
-            
-        if l>20: 
-            print ('lr l has problem  ',lr) 
-            return
-        
+            print('%d,%d, acc(%.3f,%.3f), entropy (%.4f,%.4f), %s' % (step,iter, accr,accr_v, l, l_v,now))             
+                    
         this_sec = time.time()
         if this_sec - start_sec > 60 * 15 :
             start_sec = this_sec

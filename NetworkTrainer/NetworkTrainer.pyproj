@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f995b91d-3485-48ca-b487-215ff04dcc6d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Trainer.py</StartupFile>
+    <StartupFile>test_DataReader.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

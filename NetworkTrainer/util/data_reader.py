@@ -5,51 +5,60 @@ import glob
 from sklearn.preprocessing import StandardScaler
 
 class DataReader():
-    folder = '../data'        
-    pathTrain = folder +'/character/*.png'
-    pathTest = folder +'/character0/*.png'
+    folder = '../data/'        
     ext = '.png'
-    h = 16
-    w = 12
-            
+    h = 48
+    w = 48
+    
     def __init__(self):
         print ('DataReader.py __init__') 
     
-    def ReadFolder(self, path):
+    def ReadFolder(self, path, list_image, list_label):
         
-        list_path = glob.glob(path)                                
+        list_path = glob.glob(path)               
+        
         count = len(list_path)        
         print ('ReadFolder() count', len(list_path))
-        list_image = []
-                
-        for n in range(count):            
-            list_image.append(Image.open(list_path[n]))            
-    
-        return list_image
+                        
+        for i in range(count):
+            image_path = list_path[i]
+            cindex = image_path.rindex('\\') + 1
+            num = np.int(image_path[cindex:-4]) * 1
+            list_image.append(Image.open(image_path))                            
+            list_label.append(num)
+            print ('path check', image_path, num)
 
     def ResizeImages(self, list_image):
         count = len(list_image)
-        setIn = np.zeros(shape=(count,self.h,self.w), dtype=np.float32)                        
+        
         print ('Resize Image',self.h,self.w)
-
-        for n in range(count):
-            image = list_image[n]
+        for i in range(count):
+            image = list_image[i]
             image_resize = image.resize((self.w,self.h), Image.ANTIALIAS)
-            arr = np.asarray(image_resize)            
-            setIn[n] = arr            
+            list_image[i] = np.asarray(image_resize)            
 
-        return setIn
+        return list_image
 
     def GetData(self):
-        
-        list_image_train = self.ReadFolder(self.pathTrain)
-        list_image_test = self.ReadFolder(self.pathTest)
+        list_image_train = []
+        list_image_test = []
+        list_label_train = []
+        list_label_test = []
+        font_count = 2
+        for i in range(font_count):
+            path = self.folder +'font_'+str(i)+'/*.png'
+            if i< font_count*0.5: 
+                self.ReadFolder(path, list_image_train, list_label_train)
+            else: 
+                self.ReadFolder(path, list_image_test, list_label_test)
 
-        trainIn = self.ResizeImages(list_image_train)
-        trainOut = np.arange(len(list_image_train))
+        list_image_train = self.ResizeImages(list_image_train)        
+        list_image_test = self.ResizeImages(list_image_test)
 
-        testIn = self.ResizeImages(list_image_test)
-        testOut = np.arange(len(list_image_test))
+        trainIn = np.asarray(list_image_train)
+        testIn = np.asarray(list_image_test)
+        trainOut = np.asarray(list_label_train)
+        testOut = np.asarray(list_label_test)
 
         return [trainIn,trainOut,testIn,testOut]
 
