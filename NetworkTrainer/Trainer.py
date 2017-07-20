@@ -12,9 +12,9 @@ from util.data_reader import DataReader
 import util.trainer_helper as helper
 
 DataReader = DataReader()
-EVAL_FREQUENCY = 2
-NUM_EPOCHS = 50
-isNewTrain =  True      
+EVAL_FREQUENCY = 5
+NUM_EPOCHS = 100
+isNewTrain = not True      
 
 def main(argv=None):        
       
@@ -70,7 +70,7 @@ def main(argv=None):
             save_path = saver.save(sess, model.modelName)            
             print("Model Saved, time:%s" %(now))      
            
-    print ('saver.save()', saver.save(sess, model.modelName))          
+    print ('saver.save()', saver.save(sess, model.modelName))              
     
 
 tf.app.run()

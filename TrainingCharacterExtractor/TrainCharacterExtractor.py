@@ -14,6 +14,7 @@ class TrainCharacterExtractor():
     font_offsets_x = []
     isFigure = False
     index_figure = 0
+    list_character = []
 
     def __init__(self):
         print ("TrainCharacterExtractor __init__")
@@ -35,8 +36,10 @@ class TrainCharacterExtractor():
         self.Reset()
         img = Image.open(path)
         grayImg = img.convert('L')
+        print ('Read invert', path)
         self.grayImg = PIL.ImageOps.invert(grayImg)
-        self.grayArr = np.asarray(self.grayImg).copy()       
+        self.grayArr = np.asarray(self.grayImg).copy()              
+        print ('Read Binarize')
         self.Binarize(self.grayArr) 
 
     def ClearByThreshold(self):
@@ -49,14 +52,13 @@ class TrainCharacterExtractor():
                     delete_count+=1
         print ('ClearByThreshold', shp,'delete_count',delete_count)
 
-
     def GetRotationAngle(self):    
         image = self.grayImg
         maxAngle = 0
         maxMean = 0
         ratate_step = 0.02
-        angle_min = -1.0
-        angle_max = 1.0
+        angle_min = -0.2
+        angle_max = -angle_min
         angles = []
         for angle in np.arange(angle_min,angle_max, ratate_step):
         #for i in range(angle_min,angle_max):
@@ -120,10 +122,11 @@ class TrainCharacterExtractor():
         candidate2Index = 0                
         list.append(0)
         for i in range(1,len(deriv)):            
-            
+            if i>2200 and i<2300:
+                print (i,'deriv',deriv[i],len(list),'sum_col',sum_col[i])
             if deriv[i-1]== 0 and deriv[i]==0:
                 continue
-            elif (sum_col[i]<sum_col_mean/1 and (deriv[i-1]<= 0 and deriv[i]>0.5)) or i== len(deriv)-1:
+            elif (sum_col[i]<sum_col_mean*0.75 and (deriv[i-1]<= 0 and deriv[i]>0)) or i== len(deriv)-1:
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 list.append(i)
@@ -146,7 +149,7 @@ class TrainCharacterExtractor():
             self.index_figure+=1
             plt.subplot(1,2,1)
             plt.plot(sum_col)    
-            plt.title('axis:'+str(axis) +', '+ str(len(list))+', '+ str(letterH))
+            plt.title('axis:'+str(axis) +', '+ str(len(list))+', '+ str(letterH)+'m:'+str(sum_col_mean))
             plt.grid(which='both', axis='both')
                                     
             plt.subplot(1,2,2)
@@ -163,28 +166,38 @@ class TrainCharacterExtractor():
         sumRow = np.sum(src, axis=1)
         sumCol = np.sum(src, axis=0)
         
+        h = len(sumRow)
+        w = len(sumCol)
         y0 = 0
-        y1 = len(sumRow)
+        y1 = h
         x0 = 0
-        x1 = len(sumCol)
-        threshold = np.mean(sumRow)/3
-        for y in range(len(sumRow)):
-            if sumRow[y]> threshold : 
+        x1 = w
+
+        threshold = np.mean(sumRow)/2
+        for y in range(h):            
+            weight = 1 + (abs(h/2 - y)/ (h/2))
+            if sumRow[y] * weight > threshold : 
                 y0 = y
                 break;
         for y in range(len(sumRow)):
             index = len(sumRow)-1-y
-            if sumRow[index]> threshold : 
+            center_dist = abs(h/2 - y)
+            weight = 1 + (center_dist / (h/2))
+            if sumRow[index]*weight> threshold : 
                 y1 = index
                 break;        
-        threshold = np.mean(sumCol)/3
+        threshold = np.mean(sumCol)/2
         for x in range(len(sumCol)):
-            if sumCol[x]> threshold : 
+            center_dist = abs(w/2 - x)
+            weight = 1 + (center_dist / (w/2))
+            if sumCol[x]*weight> threshold : 
                 x0 = x
                 break;
         for x in range(len(sumCol)):
             index = len(sumCol)-1-x
-            if sumCol[index]> threshold : 
+            center_dist = abs(w/2 - x)
+            weight = 1 + (center_dist / (w/2))
+            if sumCol[index] * weight> threshold : 
                 x1 = index
                 break;
         dst = src[y0:y1+1,x0:x1+1]
@@ -284,19 +297,37 @@ class TrainCharacterExtractor():
                 plt.title(str(y)+'/'+str(x)+str(cellChar.shape)+ ' m'+str(cellChar_mean))
                 plt.imshow(imgChar, cmap = plt.get_cmap('gray'))                                                    
 
-    def SaveGridCharacter(self, folder):
+    def RemoveSmallArray(self, list):
+        #check shape mean
+        sum_h = 0
+        sum_w = 0
+        for i in range(len(list)):
+            shape = list[i].shape
+            sum_h += shape[0]
+            sum_w += shape[1]
+        
+        mean_h = sum_h/len(list)
+        mean_w = sum_w/len(list)
+        print ('mean shape',sum_h/len(list),sum_w/len(list))
+        subList = []
+        for i in range(len(list)):
+            target = list[i]
+            shape = target.shape
+            if shape[0] < mean_h/2 or shape[1] < mean_w/2 : 
+                continue
+            subList.append(target)
+        return subList
+
+    def GetCharacters(self):
 
         rows = len(self.font_offsets_y)
         cols = len(self.font_offsets_x)
         print('rows:',rows,'cols',cols)
-        
-        coordinate = [[0,0],[0,1], [0,cols-3],[0,cols-2], 
-                        [rows-2,0],[rows-2,1], [rows-2,cols-3], [rows-2,cols-2]]            
-        
-        list_character = []
+                
+        list_candiate_character = []
         for y in range(rows-1):
             for x in range(cols-1):
-                print (len(list_character),'y:',y,'x:',x)                
+                #print (len(list_candiate_character),'y:',y,'x:',x)                
                 y0 = self.font_offsets_y[y]
                 y1 = self.font_offsets_y[y+1] + 1
                 x0 = self.font_offsets_x[x]
@@ -306,16 +337,17 @@ class TrainCharacterExtractor():
                 gridCell_mean = np.mean(gridCell)
                 if gridCell_mean > 2:
                     cellChar = self.RemovePadding(gridCell)
-                    print ('cellChar',cellChar.shape)
-                    imgCell = Image.fromarray(gridCell)            
-                    list_character.append(cellChar)
-        print ('list_character',len(list_character))
+                    list_candiate_character.append(cellChar)
+        print ('list_candiate_character',len(list_candiate_character))
 
+        self.list_character = self.RemoveSmallArray(list_candiate_character)        
+        print ('character count',len(self.list_character))
+        
+    def SaveCharacters(self, folder):
         if not os.path.exists(folder):os.makedirs(folder)
-        for i in range(len(list_character)):
-            imgChar = Image.fromarray(list_character[i])
+        for i in range(len(self.list_character)):
+            imgChar = Image.fromarray(self.list_character[i])
             fileName = folder+str(i)+".png"
             print ('save',i, fileName)
 
             imgChar.save(fileName)
-

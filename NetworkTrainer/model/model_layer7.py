@@ -51,6 +51,7 @@ def inference(input, train):
     for d in shape[1:]:
         dim *= d
     pool = tf.reshape(pool, [-1, dim])
+    pool = tf.nn.dropout(pool, 0.5)
     pool = tf.matmul(pool, w41f)    
     pool = tf.nn.bias_add(pool, w41b)
         
