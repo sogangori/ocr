@@ -25,6 +25,7 @@
     <Compile Include="model\model_helper.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="model\model_vgg13.py" />
     <Compile Include="model\model_layer7.py">
       <SubType>Code</SubType>
     </Compile>

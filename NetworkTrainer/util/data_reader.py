@@ -27,7 +27,8 @@ class DataReader():
             if num>=2350: 
                 print ('[error] path check', image_path, num)
                 continue
-            list_image.append(Image.open(image_path))                            
+            img = Image.open(image_path)
+            list_image.append(img.copy())                       
             list_label.append(num)
             #print ('path check', image_path, num)
 
@@ -42,15 +43,14 @@ class DataReader():
 
         return list_image
 
-    def GetData(self):
+    def GetData(self, font_count = 3):
         list_image_train = []
         list_image_test = []
         list_label_train = []
         list_label_test = []
-        font_count = 2
         for i in range(font_count):
             path = self.folder +'font_'+str(i)+'/*.png'
-            if i< font_count*0.5: 
+            if i< np.minimum(font_count*0.8, font_count-1): 
                 self.ReadFolder(path, list_image_train, list_label_train)
             else: 
                 self.ReadFolder(path, list_image_test, list_label_test)
