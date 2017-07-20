@@ -24,9 +24,12 @@ class DataReader():
             image_path = list_path[i]
             cindex = image_path.rindex('\\') + 1
             num = np.int(image_path[cindex:-4]) * 1
+            if num>=2350: 
+                print ('[error] path check', image_path, num)
+                continue
             list_image.append(Image.open(image_path))                            
             list_label.append(num)
-            print ('path check', image_path, num)
+            #print ('path check', image_path, num)
 
     def ResizeImages(self, list_image):
         count = len(list_image)
@@ -56,8 +59,8 @@ class DataReader():
         list_image_test = self.ResizeImages(list_image_test)
 
         trainIn = np.asarray(list_image_train)
-        testIn = np.asarray(list_image_test)
         trainOut = np.asarray(list_label_train)
+        testIn = np.asarray(list_image_test)
         testOut = np.asarray(list_label_test)
 
         return [trainIn,trainOut,testIn,testOut]

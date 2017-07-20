@@ -24,10 +24,10 @@ with tf.variable_scope('smap'):
     w31c = tf.get_variable("conv3_1", shape=[3, 3, channel, channel], initializer =tf.contrib.layers.xavier_initializer())
     w31b = tf.Variable(tf.constant(0.0, shape=[channel]))
 
-    w32c = tf.get_variable("conv3_2", shape=[3, 3, channel, LABEL], initializer =tf.contrib.layers.xavier_initializer())
-    w32b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
+    w32c = tf.get_variable("conv3_2", shape=[3, 3, channel, channel], initializer =tf.contrib.layers.xavier_initializer())
+    w32b = tf.Variable(tf.constant(0.0, shape=[channel]))
 
-    w41f = tf.Variable(tf.random_normal([2350,LABEL]))
+    w41f = tf.Variable(tf.random_normal([432,LABEL]))
     #w41f = tf.get_variable("fc4_1", shape=[2350,LABEL], initializer =tf.contrib.layers.xavier_initializer())
     w41b = tf.Variable(tf.constant(0.0, shape=[LABEL]))
 
@@ -36,12 +36,10 @@ def inference(input, train):
     #pool = helper.Gaussian_noise_Add(pool, 0.1, 0.3)
 
     pool = helper.conv2dRelu(input,w11c,w11b)
-    pool = helper.max_pool_2(pool)
     pool = helper.conv2dRelu(pool,w12c,w12b)   
     pool = helper.max_pool_2(pool)    
 
-    pool = helper.conv2dRelu(pool,w21c,w21b)
-    pool = helper.max_pool_2(pool)
+    pool = helper.conv2dRelu(pool,w21c,w21b)    
     pool = helper.conv2dRelu(pool,w22c,w22b)   
     pool = helper.max_pool_2(pool)
         

@@ -35,7 +35,7 @@ def main(argv=None):
   acc = tf.reduce_mean(tf.cast(tf.equal(argMax, Y), tf.float32))
   entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = predict, labels = Y))  
   loss = entropy + 1e-5 * helper.regularizer()      
-  LearningRate = 0.1    
+  LearningRate = 0.001    
   optimizer = tf.train.AdamOptimizer(LearningRate).minimize(loss) 
   
   with tf.Session() as sess:    
