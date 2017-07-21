@@ -1,5 +1,6 @@
-﻿folder = '../data/'       
-path0 = folder+'sample0.jpg'
+﻿folderTest = '../data/'       
+folder = 'C:/Users/pc/Desktop/paper/OCR/target/'
+path0 = folder+'IMG_20170718_0001.jpg'
 path1 = folder+'sample2.jpg'
 path2 = folder+'sample1.jpeg'  
 

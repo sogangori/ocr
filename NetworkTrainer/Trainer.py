@@ -2,16 +2,16 @@
 import numpy as np
 from time import localtime, strftime
 import tensorflow as tf
-import model.vgg13 as model
+import model.res10 as model
 
 from util.data_reader import DataReader
 import util.trainer_helper as helper
 
 DataReader = DataReader()
 EVAL_FREQUENCY = 1
-NUM_EPOCHS = 2
+NUM_EPOCHS = 100
 font_count = 2
-isNewTrain = not True      
+isNewTrain = True      
 LearningRate = 0.001
 
 def main(argv=None):        
@@ -44,8 +44,8 @@ def main(argv=None):
     saver = tf.train.Saver()      
     if isNewTrain: print('Initialized!')
     else :        
-        saver.restore(sess, model.modelName)
-        print("Model restored")
+        saver.restore(sess, model.modelName)        
+        print("Model restored")        
 
     sess.run(tf.local_variables_initializer())  
     start_sec = time.time()
@@ -67,7 +67,7 @@ def main(argv=None):
                 accr_v_sum += accr_v
                 if accr_v < 0.01: break;
             accr_v_mean = accr_v_sum/iter_count_valid
-            print('%d, acc(%.3f,%.3f), entropy (%.4f,%.4f), %s' % (step, accr,accr_v_mean, l, l_v,now))             
+            print('%d, acc(%.3f,%.3f), entropy (%.6f,%.6f), %s' % (step, accr,accr_v_mean, l, l_v,now))             
                     
         this_sec = time.time()
         if this_sec - start_sec > 60 * 15 :
@@ -75,7 +75,9 @@ def main(argv=None):
             save_path = saver.save(sess, model.modelName)            
             print("Model Saved, time:%s" %(now))      
            
-    print ('saver.save()', saver.save(sess, model.modelName))              
-    
+    variable_global = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+    weights = tf.get_collection(tf.GraphKeys.WEIGHTS)
+    print ('saver.save()', saver.save(sess, model.modelName),len(weights), len(variable_global))              
+        
 
 tf.app.run()

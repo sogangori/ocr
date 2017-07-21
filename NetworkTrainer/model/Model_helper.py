@@ -65,6 +65,14 @@ def depthwiseConv2dRelu(src, weights, bias):
     output = tf.nn.relu(output)
     return output 
 
+def LayerNormalize(src4d):
+    src_shape = tf.shape(src4d)
+    src_2d = tf.reshape(src4d, [src_shape[0],-1])
+    m, v = tf.nn.moments(x=src_2d, axes=[1], keep_dims=True)
+    src_normal = (src_2d - m)/tf.sqrt(v + 1e-5)
+    src_4d = tf.reshape(src_normal, src_shape)
+    return src_4d
+
 def StdNormalize(src, beta,gamma):
     batch_mean, batch_var = tf.nn.moments(x=src,axes=[0,1,2])
     out = tf.nn.batch_normalization(x=src, mean=batch_mean, variance=batch_var,offset=beta,scale=gamma,variance_epsilon=1e-3)    
@@ -101,6 +109,9 @@ def conv2dBN_Relu(src, weights, beta,gamma):
 
 def max_pool_2(src):
     return tf.nn.max_pool(src,[1, 2, 2, 1],strides=[1, 2, 2, 1],padding='SAME')    
+
+def max_pool_k3_s2(src):
+    return tf.nn.max_pool(src,[1, 3, 3, 1],strides=[1, 2, 2, 1],padding='SAME')    
 
 def bilinear_resize(src, step):
     #input_shape = tf.shape(src)

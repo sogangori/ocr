@@ -10,17 +10,18 @@ class OCR_Pre():
     
     grayImg = 0
     grayArr = 0
+    
     localMinimums = 0
     rotateImage = []
     cut_src = []
     rot_angles = []
-    font_offsets_y = []
-    plot_column = 2
+    font_offsets_y = []    
     local_min_offset_ratio = 0.75
     letterSizeCandidate = []
     isShowLocalMin = not True
     isShowLetterHeight = not True
     isFigure = False
+    index_figure = 0
 
     def __init__(self):
         print ("OCR_Pre __init__")
@@ -34,16 +35,35 @@ class OCR_Pre():
         self.Reset()
         img = Image.open(path)
         grayImg = img.convert('L')
+        print ('size',grayImg )
+        if grayImg.width< grayImg.height:
+            grayImg = grayImg.rotate(-90, resample=Image.BICUBIC, expand=True)            
+            print ('rotate size',grayImg )
         self.grayImg = PIL.ImageOps.invert(grayImg)
-        self.ResizeIfBig()
+        self.ResizeIfBig()        
         return self.grayImg
+    
+    def Binarize(self,src):
+        shp = src.shape
+        delete_count = 0
+        for y in range(shp[0]):
+            for x in range(shp[1]):
+                v = 0
+                if src[y,x]>128: v = 255                    
+                src[y,x] = v
 
     def ResizeIfBig(self):
-        image_max_h = 512
+        image_max_h = 1024+512
         if self.grayImg.height > image_max_h :
-            self.grayImg = self.grayImg.resize([image_max_h,image_max_h])
-        grayArr = np.asarray(self.grayImg)
-        self.grayArr = np.round(grayArr/128)
+            dstH = image_max_h 
+            dstW = (int)(self.grayImg.width *(1.0*image_max_h/self.grayImg.height ))
+            self.grayImg = self.grayImg.resize([dstW,dstH])
+        arr = np.asarray(self.grayImg)
+        self.grayArr = arr.copy()        
+        
+        print ('Binarize')
+        self.Binarize(self.grayArr) 
+        
 
     def GetRotation(self, src):    
         #angle = li.eig(src)
@@ -120,9 +140,12 @@ class OCR_Pre():
                 
         plot_row  = len(self.rotateImage)
         if self.isFigure:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
+            plot_column = len(self.rotateImage)
             for i in range(len(self.rotateImage)):        
                 img_rotate = self.rotateImage[i]    
-                plt.subplot(plot_row,self.plot_column,self.plot_column*i+1)    
+                plt.subplot(1,plot_column,i+1)    
                 plt.title('rotate'+str(img_rotate.shape))
                 plt.imshow(img_rotate, cmap = plt.get_cmap('gray'))
         return self.rot_angles
@@ -163,39 +186,24 @@ class OCR_Pre():
         for i in range(len(srcList)):
             dst = self.CutPadding(srcList[i])        
             self.cut_src.append(dst)
-
-        plot_row  = len(self.cut_src)
-        if self.isFigure:
+                    
+        if self.isFigure:            
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
+            plot_column=len(self.cut_src)
             for i in range(len(self.cut_src)):        
                 img_rotate = self.cut_src[i]    
-                plt.subplot(plot_row,self.plot_column,self.plot_column*i+2)
+                plt.subplot(1,plot_column,1+i)
                 plt.title('cut'+str(img_rotate.shape))
                 plt.imshow(img_rotate, cmap = plt.get_cmap('gray'))
 
         return self.cut_src
 
-    def RemoveLine(self, src):
-        sobelH = ndimage.sobel(src, 0)
-        sobelV = ndimage.sobel(src, 1)
-        if self.isFigure:
-            plt.figure(2)
-            plt.title('sobelH')
-            plt.imshow(sobelH)            
-            plt.figure(3)
-            plt.title('sobelVertival')
-            plt.imshow(sobelV)        
-
-    def RemoveLines(self):
-        srcList = self.cut_src
-        for i in range(len(srcList)):
-            self.RemoveLine(srcList[i])
 
     def GetLetterSize(self, src):    
         lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
-        sum_col = np.sum(src, axis=1)
-        #sum_col = np.convolve(sum_col,lpf,'same')
+        sum_col = np.sum(src, axis=1)        
         sum_col = np.convolve(sum_col,lpf,'valid')
-        #sum_col = np.convolve(sum_col,lpf,'valid')
         under = np.zeros_like(sum_col)
         under[:-1] = sum_col[1:]
         deriv = under-sum_col    
@@ -205,16 +213,16 @@ class OCR_Pre():
         pillas = []
         pillas_offset = []        
                         
-        for i in range(len(deriv)-1):
-            #if sum_col[i]<sum_col_mean/2 and ((deriv[i]< 0 and deriv[i+1]>0) or (deriv[i]== 0 and deriv[i+1]>0)):
-            if deriv[i]== 0 and deriv[i+1]==0:
+        for i in range(1, len(deriv)):            
+            if deriv[i-1]== 0 and deriv[i]==0:
                 continue
-            elif sum_col[i]<sum_col_mean/1 and (deriv[i]<= 0 and deriv[i+1]>0):
+            elif sum_col[i]<sum_col_mean*0.75 and (deriv[i-1]<= 0 and deriv[i]>0):
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 pillas_offset.append(i)
                 print ('row',i0,'~', i,'w:', pilla_w)
                 i0 = i
+                self.grayArr[i,::2] = 255
     
         print ('pillar_count ',len(pillas))
         pilla_arr = np.array(pillas)
@@ -243,11 +251,17 @@ class OCR_Pre():
         
         self.letterSizeCandidate.append(letterH)
         if self.isFigure and self.isShowLetterHeight:
-            plt.figure(1)
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
             plt.plot(sum_col)    
             plt.grid(which='both', axis='both')
-            plt.show()        
-
+            
+    def GetLetterSizes(self):
+        srcList = self.cut_src
+        for i in range(len(srcList)):
+            src = srcList[i]
+            self.GetLetterSize(src)          
+              
     def SlideWindow(self, src,font_offsets_y, patchSize):
         #일단 이걸로 찾어보고 얘기하자
         h = src.shape[0]
@@ -262,14 +276,7 @@ class OCR_Pre():
                     plt.imshow(patch, cmap = plt.get_cmap('gray'))
                     plt.ylabel(y)
                     plt.draw()
-                    plt.pause(0.001) 
-                    #plt.show()        
-
-    def GetLetterSizes(self):
-        srcList = self.cut_src
-        for i in range(len(srcList)):
-            src = srcList[i]
-            self.GetLetterSize(src)            
+                    plt.pause(0.001)                     
     
     def SlideCandidateRow(self):
         srcList = self.cut_src
@@ -318,33 +325,36 @@ class OCR_Pre():
         src_100 = np.asarray(image_100)
         print ('src resize', src.shape ,'->',src_100.shape)
         sum_row = np.sum(src_100, axis=0)
-            
+        sum_col = np.sum(src, axis=1)        
+        #lpf = [0,0.1,0.2,0.1,0]
+        #sum_col = np.convolve(sum_col,lpf,'valid')    
         rows_normal = self.Normalize(sum_row)*2-1
         x = np.arange(len(sum_row ))
     
         loss_min = 10000
         best_cos_arr =0
         iteration = 100
-        step = 0.5    
-        for i in range(1,iteration):        
-            cos_arr = -np.cos(x/(i*step))
+        
+        for i in np.arange(1,20,0.2):        
+            cos_arr = -np.cos(x/i)
             loss = np.mean(np.square(rows_normal - cos_arr))        
             if loss < loss_min: 
                 loss_min = loss
                 best_cos_arr = cos_arr
-                #print ('loss_min_scale',i,'loss',loss)        
-            cos_arr = np.sin(x/(i*step))
+                print ('loss_min_scale',i,'loss',loss)        
+            cos_arr = np.sin(x/i)
             loss = np.mean(np.square(rows_normal - cos_arr))
             if loss < loss_min: 
                 loss_min = loss            
                 best_cos_arr = cos_arr
         
         if self.isShowLocalMin:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
             plt.plot(x,rows_normal)    
             plt.plot(x,best_cos_arr)    
             plt.grid(which='both', axis='both')
-            plt.show()
-
+            
         self.localMinimums  = self.GetLocalMinimum(best_cos_arr+1)   
         return self.localMinimums
         
