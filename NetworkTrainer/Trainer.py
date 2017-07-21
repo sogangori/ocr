@@ -2,14 +2,12 @@
 import numpy as np
 from time import localtime, strftime
 import tensorflow as tf
-#import model.model_layer7 as model 
-import model.model_vgg13 as model_vgg13 
+import model.vgg13 as model
 
 from util.data_reader import DataReader
 import util.trainer_helper as helper
 
 DataReader = DataReader()
-model = model_vgg13()
 EVAL_FREQUENCY = 1
 NUM_EPOCHS = 2
 font_count = 2
