@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f995b91d-3485-48ca-b487-215ff04dcc6d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Trainer.py</StartupFile>
+    <StartupFile>copy_weight.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,13 +25,19 @@
     <Compile Include="model\model_helper.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="model\model_vgg13.py" />
-    <Compile Include="model\model_layer7.py">
+    <Compile Include="model\vgg11.py" />
+    <Compile Include="model\vgg13.py" />
+    <Compile Include="model\layer7.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\vgg16.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="model\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="copy_weight.py" />
+    <Compile Include="Trainer_transfer.py" />
     <Compile Include="Trainer.py">
       <SubType>Code</SubType>
     </Compile>

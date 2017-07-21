@@ -1,2 +1,5 @@
 *.suo
 *.pyc
+*.meta
+*.index
+*.png

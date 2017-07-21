@@ -1,23 +1,20 @@
-﻿
-import time
+﻿import time
 import numpy as np
 from time import localtime, strftime
-import sklearn.metrics as metrics
-from six.moves import urllib
-from six.moves import xrange
-import numpy as np
 import tensorflow as tf
 #import model.model_layer7 as model 
-import model.model_vgg13 as model 
+import model.model_vgg13 as model_vgg13 
 
 from util.data_reader import DataReader
 import util.trainer_helper as helper
 
 DataReader = DataReader()
+model = model_vgg13()
 EVAL_FREQUENCY = 1
-NUM_EPOCHS = 30
-font_count = 4
-isNewTrain = not  True      
+NUM_EPOCHS = 2
+font_count = 2
+isNewTrain = not True      
+LearningRate = 0.001
 
 def main(argv=None):        
       
@@ -28,10 +25,9 @@ def main(argv=None):
   testIn = testIn/255.0
   print ('trainIn',trainIn.shape)
   print ('testIn',testIn.shape)
-  iter_count = font_count * 3
-  iter_count_valid = (int)(iter_count* (testIn.shape[0]/trainIn.shape[0]))    
-  batch = (int)(trainIn.shape[0]/iter_count)    
-  batch_valid = (int)(testIn.shape[0]/iter_count_valid)    
+  batch = 2350/5#model.LABEL
+  iter_count = (int)(np.ceil(1.0*testIn.shape[0]/batch))
+  iter_count_valid = (int)(np.ceil(1.0*testIn.shape[0]/batch))    
   X = tf.placeholder(tf.float32, [None,trainIn.shape[1],trainIn.shape[2],1])
   Y = tf.placeholder(tf.int32, [None])
   IsTrain = tf.placeholder(tf.bool)  
@@ -41,8 +37,8 @@ def main(argv=None):
   print('argMax',argMax)
   acc = tf.reduce_mean(tf.cast(tf.equal(argMax, Y), tf.float32))
   entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = predict, labels = Y))  
-  loss = entropy + 1e-5 * helper.regularizer()      
-  LearningRate = 0.001    
+  loss = entropy + 1e-8 * helper.regularizer()      
+   
   optimizer = tf.train.AdamOptimizer(LearningRate).minimize(loss) 
   
   with tf.Session() as sess:    
@@ -54,9 +50,10 @@ def main(argv=None):
         print("Model restored")
 
     sess.run(tf.local_variables_initializer())  
-    start_sec = start_time = time.time()
+    start_sec = time.time()
         
-    for step in range(NUM_EPOCHS):        
+    for step in range(NUM_EPOCHS):
+                
         for iter in range(iter_count):
             offset = iter * batch
             feed_dict = {X: trainIn[offset:offset+batch], Y: trainOut[offset:offset+batch], IsTrain:True}       
@@ -72,7 +69,7 @@ def main(argv=None):
                 accr_v_sum += accr_v
                 if accr_v < 0.01: break;
             accr_v_mean = accr_v_sum/iter_count_valid
-            print('%d,%d, acc(%.3f,%.3f), entropy (%.4f,%.4f), %s' % (step,batch, accr,accr_v_mean, l, l_v,now))             
+            print('%d, acc(%.3f,%.3f), entropy (%.4f,%.4f), %s' % (step, accr,accr_v_mean, l, l_v,now))             
                     
         this_sec = time.time()
         if this_sec - start_sec > 60 * 15 :

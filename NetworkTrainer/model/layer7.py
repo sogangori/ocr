@@ -1,7 +1,4 @@
-﻿
-import os
-import sys
-import tensorflow as tf
+﻿import tensorflow as tf
 import model.model_helper as helper
 
 modelName = "./weights/model_layer6.pd"

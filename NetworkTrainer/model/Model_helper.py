@@ -2,7 +2,7 @@
 import time
 import numpy as np
 
-def dropout(src, keep_prop):
+def dropout(src, keep_prop, isDrop):
     src = tf.cond(isDrop, lambda:tf.nn.dropout(src, keep_prop), lambda:identity(src))
     return src
 
@@ -45,7 +45,7 @@ def Gaussian_noise(input_layer, stdAlpha, stdBeta):
     src = Gaussian_noise_volumn_layer(input_layer,stdAlpha)
     return Gaussian_noise_layer(src,stdBeta)   
 
-def Gaussian_noise_Add(input_layer, stdAlpha, stdBeta):
+def Gaussian_noise_Add(input_layer, stdAlpha, stdBeta,isTrain):
     return tf.cond(isTrain, lambda:Gaussian_noise(input_layer,stdAlpha,stdBeta), lambda:identity(input_layer))
 
 def upConv(src, weights, bias,up_shape):
@@ -99,11 +99,6 @@ def conv2dBN_Relu(src, weights, beta,gamma):
     bn = batchNormal(conv,beta,gamma)
     return tf.nn.relu(bn)
 
-def avg_pool_resize(src, step):
-    if step%3==1: src= tf.nn.avg_pool(src,pool_stride2,strides=pool_stride2,padding='SAME')
-    elif step%3==2:src= tf.nn.avg_pool(src,pool_stride3,strides=pool_stride3,padding='SAME')
-    return src
-
 def max_pool_2(src):
     return tf.nn.max_pool(src,[1, 2, 2, 1],strides=[1, 2, 2, 1],padding='SAME')    
 
@@ -117,3 +112,10 @@ def bilinear_resize(src, step):
     dstW = np.round(srcW/scale)
     src= resize(src,dstH,dstW)
     return src
+
+def reshape_4d_to_2d(src):
+    shape = src.get_shape().as_list()
+    dim = 1
+    for d in shape[1:]:
+        dim *= d
+    return tf.reshape(src, [-1, dim])
