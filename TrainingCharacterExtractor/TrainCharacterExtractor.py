@@ -123,8 +123,7 @@ class TrainCharacterExtractor():
         sum_col_mean = np.mean(sum_col)
         print ('sum_col mean',np.mean(sum_col))
         i0 = 0
-        pillas = []        
-        candidate2Index = 0                
+        pillas = []                
         list.append(0)
         for i in range(1,len(deriv)):    
             if deriv[i-1]== 0 and deriv[i]==0:
@@ -133,9 +132,7 @@ class TrainCharacterExtractor():
                 pilla_w = i-i0                
                 pillas.append(pilla_w)
                 list.append(i)
-                #print ('axis',axis,candidate2Index, i0,'~', i,'w:', pilla_w)
                 i0 = i
-                candidate2Index+=1
                 if axis==1: self.gridArr[i,::2] = 255
                 else : self.gridArr[::2,i] = 255
                 

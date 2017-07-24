@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f2f45a79-10df-4bb6-a6e5-7b4e2a3dddb9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Run_ocr.py</StartupFile>
+    <StartupFile>Run_2_row_detector.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,6 +25,7 @@
     <Compile Include="Data.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Run_2_row_detector.py" />
     <Compile Include="Run_ocr.py" />
     <Compile Include="test\CutPadding.py">
       <SubType>Code</SubType>
@@ -36,6 +37,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test\unit_test_ocr_pre.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="util\Detector.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="util\OCR_Pre.py" />

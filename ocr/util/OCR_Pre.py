@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
 import numpy.linalg as li
-
+import os
 
 class OCR_Pre():
     
@@ -18,8 +18,7 @@ class OCR_Pre():
     font_offsets_y = []    
     local_min_offset_ratio = 0.75
     letterSizeCandidate = []
-    isShowLocalMin = not True
-    isShowLetterHeight = not True
+    isShowLocalMin = not True    
     isFigure = False
     index_figure = 0
 
@@ -40,7 +39,11 @@ class OCR_Pre():
             grayImg = grayImg.rotate(-90, resample=Image.BICUBIC, expand=True)            
             print ('rotate size',grayImg )
         self.grayImg = PIL.ImageOps.invert(grayImg)
-        self.ResizeIfBig()        
+        self.grayArr = np.asarray(self.grayImg).copy()                
+        print ('Resize if big')
+        self.ResizeIfBig()                
+        print ('Binarize')
+        self.Binarize(self.grayArr)
         return self.grayImg
     
     def Binarize(self,src):
@@ -53,17 +56,12 @@ class OCR_Pre():
                 src[y,x] = v
 
     def ResizeIfBig(self):
-        image_max_h = 1024+512
-        if self.grayImg.height > image_max_h :
-            dstH = image_max_h 
-            dstW = (int)(self.grayImg.width *(1.0*image_max_h/self.grayImg.height ))
-            self.grayImg = self.grayImg.resize([dstW,dstH])
-        arr = np.asarray(self.grayImg)
-        self.grayArr = arr.copy()        
-        
-        print ('Binarize')
-        self.Binarize(self.grayArr) 
-        
+        image_max_h = 1024
+        #if self.grayImg.height > image_max_h :
+        #    dstH = (int)(self.grayImg.height / 2)
+        #    dstW = (int)(self.grayImg.width / 2)
+        #    self.grayImgS = self.grayImg.resize([dstW,dstH])
+        #    self.grayArrS = np.asarray(self.grayImgS).copy()        
 
     def GetRotation(self, src):    
         #angle = li.eig(src)
@@ -93,11 +91,10 @@ class OCR_Pre():
         image = Image.fromarray(src)
         maxAngle = 0
         maxMean = 0
-        ratate_step = 0.5
-        angle_min = -10
-        angle_max = 10
+        ratate_step = 0.1
+        angle_max = 10        
         angles = []
-        for angle in np.arange(angle_min,angle_max,ratate_step):            
+        for angle in np.arange(-angle_max,angle_max,ratate_step):            
             image_rot = image.rotate(angle)
             src = np.asarray(image_rot)
             mean_1 = np.mean(np.std(src, axis=1))
@@ -130,6 +127,7 @@ class OCR_Pre():
         for i in range(len(candidate_offset)):
             offset = candidate_offset[i]
             print ('offset ',offset )
+            
             candidate = src[:,offset [0]:offset [1]]            
             angle = self.GetRotationAngle(candidate)        
             self.rot_angles.append(angle)
@@ -138,7 +136,7 @@ class OCR_Pre():
             image_rot_cut = src_rot[:,offset [0]:offset [1]]
             self.rotateImage.append(image_rot_cut)
                 
-        plot_row  = len(self.rotateImage)
+        plot_row = len(self.rotateImage)
         if self.isFigure:
             plt.figure(self.index_figure)            
             self.index_figure+=1
@@ -149,7 +147,15 @@ class OCR_Pre():
                 plt.title('rotate'+str(img_rotate.shape))
                 plt.imshow(img_rotate, cmap = plt.get_cmap('gray'))
         return self.rot_angles
-
+    
+    def SaveRotations(self,folder):
+        if not os.path.exists(folder):os.makedirs(folder)
+        for i in range(len(self.rotateImage)):        
+            fileName = folder+'/'+str(i)+".png"
+            img_rotate = Image.fromarray(self.rotateImage[i])
+            print (i,img_rotate)
+            img_rotate.save(fileName)
+              
     def CutPadding(self, src):
         sum_row = np.sum(src, axis=0)
         sum_col = np.sum(src, axis=1)
@@ -199,11 +205,11 @@ class OCR_Pre():
 
         return self.cut_src
 
-
     def GetLetterSize(self, src):    
         lpf = [0,0.1,0.2,0.3,0.4,0.3,0.2,0.1,0]
+        #lpf = [0,0.1,0.2,0.3,0.2,0.1,0]
         sum_col = np.sum(src, axis=1)        
-        sum_col = np.convolve(sum_col,lpf,'valid')
+        sum_col = np.convolve(sum_col,lpf,'same')
         under = np.zeros_like(sum_col)
         under[:-1] = sum_col[1:]
         deriv = under-sum_col    
@@ -222,7 +228,7 @@ class OCR_Pre():
                 pillas_offset.append(i)
                 print ('row',i0,'~', i,'w:', pilla_w)
                 i0 = i
-                self.grayArr[i,::2] = 255
+                #src[i,::2] = 255
     
         print ('pillar_count ',len(pillas))
         pilla_arr = np.array(pillas)
@@ -230,8 +236,7 @@ class OCR_Pre():
         pilla_mean = np.mean(pilla_arr)
         mean_simmilar_sum=0
         mean_simmilar_sum_count=0
-        print ('pilla_arr',pilla_arr.shape,pilla_mean, pilla_std)
-        candidate2Index=0
+        print ('pilla_arr',pilla_arr.shape,pilla_mean, pilla_std)        
         font_offset = []
         y0 = 0
         for i in range(len(pillas)):
@@ -242,26 +247,53 @@ class OCR_Pre():
                 mean_simmilar_sum +=v
                 mean_simmilar_sum_count+=1
                 font_offset.append(pillas_offset[i])                                
-                print ('font row',i,candidate2Index, 'y:',y0,'~',y1, v)
-                candidate2Index+=1
+                print ('font row',i,'y:',y0,'~',y1, v)
+                src[y1,::2] = 255
             #else: //TODO
         self.font_offsets_y.append(font_offset)
         letterH = (int)(mean_simmilar_sum/mean_simmilar_sum_count)
         print ('letterSizeCandidate',letterH,mean_simmilar_sum,mean_simmilar_sum_count)
         
         self.letterSizeCandidate.append(letterH)
-        if self.isFigure and self.isShowLetterHeight:
-            plt.figure(self.index_figure)            
-            self.index_figure+=1
-            plt.plot(sum_col)    
-            plt.grid(which='both', axis='both')
+        return sum_col        
             
     def GetLetterSizes(self):
         srcList = self.cut_src
+        if self.isFigure:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
         for i in range(len(srcList)):
             src = srcList[i]
-            self.GetLetterSize(src)          
-              
+            sum_col = self.GetLetterSize(src)          
+            if self.isFigure:
+                plt.subplot(2,len(srcList), i+1)        
+                plt.imshow(Image.fromarray(src) , cmap = plt.get_cmap('gray'))        
+                plt.subplot(2,len(srcList), len(srcList)+ i+1)
+                plt.plot(sum_col)    
+                plt.title(str(self.letterSizeCandidate[i]))
+                plt.grid(which='both', axis='both')
+    
+    def GetCandidateRows(self,folder):
+        srcList = self.cut_src
+        if self.isFigure:
+            plt.figure(self.index_figure)            
+            self.index_figure+=1
+        for i in range(len(srcList)):
+            src = srcList[i]
+            print ('src',src.shape)
+            font_offsets_list = self.font_offsets_y[i]
+            print (i,font_offsets_list )
+            if self.isFigure and i==0:
+                if not os.path.exists(folder):os.makedirs(folder)
+                for y in range(len(font_offsets_list)-1):
+                    plt.subplot(len(font_offsets_list)-1,1, y+1)                            
+                    imgRow = Image.fromarray(src[font_offsets_list[y]:font_offsets_list[y+1]]) 
+                    fileName = folder+'/'+str(y)+".png"
+                    #print ('save image',imgRow ,fileName)
+                    imgRow.save(fileName)      
+                    plt.imshow(imgRow, cmap = plt.get_cmap('gray'))  
+        return 0
+
     def SlideWindow(self, src,font_offsets_y, patchSize):
         #일단 이걸로 찾어보고 얘기하자
         h = src.shape[0]

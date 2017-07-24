@@ -25,15 +25,18 @@
     <Compile Include="model\model_helper.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="model\dense.py" />
     <Compile Include="model\res10.py" />
     <Compile Include="model\vgg11.py" />
-    <Compile Include="model\res18.py" />
     <Compile Include="model\vgg13.py" />
     <Compile Include="model\layer7.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="model\vgg11_s.py" />
     <Compile Include="model\vgg16.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\vgg16_ori.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="model\__init__.py">
