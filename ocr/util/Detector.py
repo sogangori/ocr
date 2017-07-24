@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
 import numpy.linalg as li
+import os
 
 def Read(path):
         
@@ -161,24 +162,68 @@ def Get_cell_no_line(src, offsets):
     for i in range(count-1):        
         cell = src[offsets[i]:offsets[i+1]]
         height = arr_height[i]
-        if height>mean-std: 
+        if height>mean-std and height<mean+std: 
             list_offset.append(cell)
 
     return list_offset 
 
-def RemoveVerticalLine(lists):
+def Normalize( src):
+    dst = (src - np.min(src)) / (np.max(src)-np.min(src))
+    return dst
+
+def GetLocalMinimum(src):    
+    
+    under = np.zeros_like(src)
+    under[:-1] = src[1:]
+    deriv = under-src
+    deriv_abs = deriv
+    localMinimumIndexs = []    
+    
+    local_min_offset = len(deriv)
+    for i in range(local_min_offset-1):
+        if deriv[i]< 0 and deriv[i+1]>0:
+            #print ('local', i,deriv[i],deriv[i+1])    
+            localMinimumIndexs.append(i)
+    
+    return localMinimumIndexs
+
+def Remove_row_padding(lists):
     list_dst = []
     for i in range(len(lists)):        
-        src = lists[i]
-        #dst = RemoveLines(src, axis=0)
+        src = lists[i]        
         list_dst.append(src)
+        
+        mean = np.mean(src, axis=1)
+        mean = Normalize(mean)*2-1
+        loss_min = 10000
+        j_min = 0
+        offset_min = 0
+        for j in np.arange(0,10,0.1):
+            for offset in range(10):
+                x = np.arange(len(mean))+offset
+                cos_arr = -np.cos(x/j)
+                loss = np.mean(np.square(mean - cos_arr))        
+                if loss < loss_min: 
+                    loss_min = loss
+                    j_min =j                
+                    offset_min = offset
+                    #print ('loss_min_scale',i,'loss',loss)        
+        if i==2:
+            plt.figure(5)              
+            plt.plot(mean)
+            x = np.arange(len(mean))+offset_min
+            cos_arr = -np.cos(x/j_min)
+            plt.plot(cos_arr)
+            localMinIndex = GetLocalMinimum(cos_arr)
+            print (i,localMinIndex)
+
     return list_dst
         
 def GetCandidateRows(src2d,offsets,folder):
     cells = Get_cell_no_line(src2d, offsets)
     print ('len(offsets)',len(offsets),'->', len(cells))
-
-    cells = RemoveVerticalLine(cells)
+    cells = Remove_row_padding(cells)
+    if not os.path.exists(folder):os.makedirs(folder)
     for i in range(len(cells)):        
         src = cells[i]
         imgRow = Image.fromarray(src) 

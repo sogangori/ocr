@@ -91,8 +91,8 @@ class OCR_Pre():
         image = Image.fromarray(src)
         maxAngle = 0
         maxMean = 0
-        ratate_step = 0.1
-        angle_max = 10        
+        ratate_step = 0.01
+        angle_max = 3        
         angles = []
         for angle in np.arange(-angle_max,angle_max,ratate_step):            
             image_rot = image.rotate(angle)
